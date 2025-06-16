@@ -228,6 +228,7 @@ function App() {
         body: JSON.stringify({ ...answers, pairs }),
       });
       const data = await res.json();
+      console.log("Response status:", res.status, "Body:", data);
       if (!res.ok) throw new Error(data.error || "Unknown error");
       setResult(data);
     } catch (e) {
