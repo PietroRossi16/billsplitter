@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import {
   FaBolt,
@@ -17,8 +17,8 @@ const SERVICE_ICONS = [
     color: "#FFD700",
   }, // Yellow
   { key: "gas", label: "Gas", icon: <FaFire />, color: "#FF4444" }, // Red
-  { key: "wifi", label: "WiFi", icon: <FaWifi />, color: "#87CEEB" }, // Light Blue
-  { key: "tv", label: "TV", icon: <FaTv />, color: "#90EE90" }, // Light Green
+  { key: "wifi", label: "WiFi", icon: <FaWifi />, color: "#2196F3" }, // Strong Blue
+  { key: "tv", label: "TV", icon: <FaTv />, color: "#43D15D" }, // Strong Green
 ];
 
 function getSteps(selected) {
@@ -41,7 +41,7 @@ function getSteps(selected) {
       key: "tot_days",
       question: "How many days do your bills cover?",
       type: "number",
-      min: 1,
+      min: 0.01,
       validate: (v) => v > 0,
       icon: null,
       borderColor: null,
@@ -142,7 +142,7 @@ function getSteps(selected) {
       min: 0,
       validate: (v) => v >= 0,
       icon: "wifi",
-      borderColor: "#87CEEB",
+      borderColor: "#2196F3",
     });
   }
 
@@ -156,7 +156,7 @@ function getSteps(selected) {
       min: 0,
       validate: (v) => v >= 0,
       icon: "tv",
-      borderColor: "#90EE90",
+      borderColor: "#43D15D",
     });
   }
 
@@ -179,18 +179,21 @@ function getDefaultAnswers(selected) {
 // Loading spinner component
 function LoadingSpinner({ progress }) {
   const radius = 45;
-  const circumference = 2 * Math.PI * radius * 0.75; // 270 degrees
+  const center = 50;
+  const startAngle = 180; // leftmost
+  const endAngle = 0; // rightmost
+  const angle = startAngle - (progress / 100) * 180; // 0% = 180deg, 100% = 0deg
+  const circumference = Math.PI * radius; // 180deg arc
   const strokeDashoffset = circumference - (progress / 100) * circumference;
-  const angle = (progress / 100) * 270 - 135; // Start from left (-135°)
-  const dotX = 50 + radius * Math.cos((angle * Math.PI) / 180);
-  const dotY = 50 + radius * Math.sin((angle * Math.PI) / 180);
+  const dotX = center + radius * Math.cos((angle * Math.PI) / 180);
+  const dotY = center + radius * Math.sin((angle * Math.PI) / 180);
 
   return (
     <div className="loading-spinner">
       <svg width="100" height="100" viewBox="0 0 100 100">
         {/* Background arc */}
         <path
-          d="M 5 50 A 45 45 0 1 1 95 50"
+          d="M 5 50 A 45 45 0 0 1 95 50"
           fill="none"
           stroke="#e0e0e0"
           strokeWidth="6"
@@ -198,7 +201,7 @@ function LoadingSpinner({ progress }) {
         />
         {/* Progress arc */}
         <path
-          d="M 5 50 A 45 45 0 1 1 95 50"
+          d="M 5 50 A 45 45 0 0 1 95 50"
           fill="none"
           stroke="#61dafb"
           strokeWidth="6"
@@ -272,6 +275,9 @@ function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [showHelp, setShowHelp] = useState(false);
+  const inputRef = useRef(null);
+  const nameInputRef = useRef(null);
+  const daysInputRef = useRef(null);
 
   const steps = getSteps(selected);
   const current = steps[step];
@@ -473,6 +479,24 @@ function App() {
     return renderIcon(current.icon);
   };
 
+  // Autofocus logic
+  useEffect(() => {
+    if (serviceStep) return;
+    if (result) return;
+    if (current.type === "pairs" || current.type === "pairs_names_only") {
+      if (nameInputRef.current) nameInputRef.current.focus();
+    } else {
+      if (inputRef.current) inputRef.current.focus();
+    }
+  }, [step, serviceStep, result, current.type]);
+
+  // Add Enter key for Add button in pairs steps
+  const handlePairKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleAddPair();
+    }
+  };
+
   return (
     <div className="App">
       <h1>Bill Splitter</h1>
@@ -493,6 +517,7 @@ function App() {
               <div
                 key={s.key}
                 className={`service-icon${selected[s.key] ? " selected" : ""}`}
+                data-service={s.key}
                 onClick={() => handleServiceToggle(s.key)}
                 style={{
                   "--icon-color": s.color,
@@ -553,7 +578,7 @@ function App() {
           </button>
           <div className="share-message">
             If you like our tool and find it useful, please send it to your
-            friends! We appreciate your help.
+            friends! We appreciate your support.
           </div>
         </div>
       ) : (
@@ -578,11 +603,12 @@ function App() {
 
           {current.type === "number" && (
             <input
+              ref={inputRef}
               type="text"
               min={current.min}
               value={answers[current.key] || ""}
               onChange={handleChange}
-              onInput={(e) => handleNumberInput(e, false)}
+              onInput={(e) => handleNumberInput(e, true)}
               className="input"
             />
           )}
@@ -590,6 +616,7 @@ function App() {
           {current.type === "number_percent" && (
             <div className="input-with-symbol">
               <input
+                ref={inputRef}
                 type="text"
                 min={0}
                 value={answers[current.key] || ""}
@@ -604,6 +631,7 @@ function App() {
           {current.type === "number_pence_per_day" && (
             <div className="input-with-symbol">
               <input
+                ref={inputRef}
                 type="text"
                 min={0}
                 value={answers[current.key] || ""}
@@ -619,6 +647,7 @@ function App() {
             <div className="input-with-symbol">
               <span className="input-symbol">£</span>
               <input
+                ref={inputRef}
                 type="text"
                 min={0}
                 value={answers[current.key] || ""}
@@ -634,15 +663,18 @@ function App() {
             <div>
               <div className="pair-input-container">
                 <input
+                  ref={nameInputRef}
                   type="text"
                   name="name"
                   placeholder="Name"
                   value={pairInput.name}
                   onChange={handlePairChange}
+                  onKeyDown={handlePairKeyDown}
                   className="input"
                 />
                 {current.type === "pairs" && (
                   <input
+                    ref={daysInputRef}
                     type="text"
                     name="num_days"
                     placeholder="Days at property"
@@ -651,6 +683,7 @@ function App() {
                     value={pairInput.num_days}
                     onChange={handlePairChange}
                     onInput={(e) => handleNumberInput(e, true)}
+                    onKeyDown={handlePairKeyDown}
                     className="input"
                   />
                 )}

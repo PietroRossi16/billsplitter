@@ -479,3 +479,11 @@ h1 {
     gap: 32px;
   }
 }
+
+/* WiFi and TV icon color overrides for stronger color */
+.service-icon[data-service="wifi"], .service-icon.selected[data-service="wifi"] {
+  --icon-color: #2196F3 !important;
+}
+.service-icon[data-service="tv"], .service-icon.selected[data-service="tv"] {
+  --icon-color: #43D15D !important;
+}
