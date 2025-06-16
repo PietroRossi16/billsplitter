@@ -559,6 +559,7 @@ function App() {
               : `Calculation error: £${result.error.toFixed(2)}`}
           </div>
           <button
+            className="start-over-btn"
             onClick={() => {
               setResult(null);
               setServiceStep(true);
