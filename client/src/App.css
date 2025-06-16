@@ -8,6 +8,7 @@
   justify-content: flex-start;
   font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
   padding-top: 40px;
+  position: relative;
 }
 
 h1 {
@@ -16,103 +17,84 @@ h1 {
   letter-spacing: 1px;
 }
 
-.modal {
+/* Help Button */
+.help-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(97, 218, 251, 0.1);
+  border: 1px solid rgba(97, 218, 251, 0.3);
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  z-index: 1000;
+}
+
+.help-button:hover {
+  background: rgba(97, 218, 251, 0.2);
+  border-color: rgba(97, 218, 251, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Help Popup */
+.help-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.help-popup-content {
   background: #2c2f34;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-  padding: 32px 24px;
-  min-width: 340px;
-  max-width: 95vw;
-  margin: 0 auto;
-  margin-bottom: 32px;
+  padding: 24px;
+  max-width: 400px;
+  margin: 20px;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
 }
 
-.question {
-  font-size: 1.2rem;
-  margin-bottom: 18px;
-  font-weight: 500;
-}
-
-.input {
-  padding: 10px 12px;
-  border-radius: 8px;
+.help-popup-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
   border: none;
-  margin: 0 8px 12px 0;
-  font-size: 1rem;
-  width: 180px;
-  background: #232526;
-  color: #fff;
-  outline: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  transition: box-shadow 0.2s;
-}
-.input:focus {
-  box-shadow: 0 0 0 2px #61dafb;
-}
-
-.input-symbol {
-  font-size: 1.1rem;
   color: #bbb;
-  margin-left: 2px;
-  white-space: nowrap;
-}
-
-.add-btn, .remove-btn, .nav-btn, .submit-btn {
-  background: #61dafb;
-  color: #232526;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  margin: 0 6px 8px 0;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.2rem;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s;
 }
-.add-btn:hover, .remove-btn:hover, .nav-btn:hover, .submit-btn:hover {
-  background: #21a1f3;
+
+.help-popup-close:hover {
   color: #fff;
 }
 
-.remove-btn {
-  background: #ff4d4f;
-  color: #fff;
-  margin-left: 12px;
-}
-.remove-btn:hover {
-  background: #d9363e;
+.help-popup-content h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #61dafb;
 }
 
-.actions {
-  margin-top: 18px;
+.help-popup-content p {
+  line-height: 1.6;
+  margin: 0;
 }
 
-.pair-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 12px 0;
-}
-.pair-list li {
-  margin-bottom: 6px;
-  font-size: 1rem;
-}
-
-.error {
-  color: #ff4d4f;
-  margin-bottom: 10px;
-  font-weight: 500;
-}
-
-@media (max-width: 500px) {
-  .modal {
-    min-width: unset;
-    padding: 18px 6px;
-  }
-  .input {
-    width: 120px;
-  }
-}
-
+/* Service Selection */
 .service-select-modal {
   background: #2c2f34;
   border-radius: 16px;
@@ -124,6 +106,13 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.service-select-modal h2 {
+  margin-bottom: 24px;
+  text-align: center;
+  font-size: 1.3rem;
+  color: #61dafb;
 }
 
 .service-icons {
@@ -143,73 +132,290 @@ h1 {
   height: 80px;
   background: #232526;
   border-radius: 16px;
-  font-size: 2.2rem;
-  color: #bbb;
   cursor: pointer;
   position: relative;
   border: 2px solid transparent;
-  transition: border 0.2s, color 0.2s, background 0.2s;
+  transition: all 0.3s ease;
+  padding: 8px;
 }
+
+.service-icon:hover .service-icon-inner {
+  color: var(--icon-color);
+  transform: scale(1.1);
+}
+
 .service-icon.selected {
-  border: 2px solid #61dafb;
-  color: #61dafb;
-  background: #232d3a;
+  border-color: var(--icon-color);
+  background: rgba(255, 255, 255, 0.05);
 }
+
+.service-icon.selected .service-icon-inner {
+  color: var(--icon-color);
+}
+
+.service-icon-inner {
+  font-size: 2.2rem;
+  color: #bbb;
+  transition: all 0.3s ease;
+}
+
 .service-label {
-  font-size: 1rem;
+  font-size: 0.9rem;
   margin-top: 8px;
   color: #fff;
+  text-align: center;
 }
+
 .tick {
   position: absolute;
   top: 8px;
-  right: 12px;
-  background: #61dafb;
+  right: 8px;
+  background: var(--icon-color);
   color: #232526;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
-.proceed-btn {
+
+/* Modal */
+.modal {
+  background: #2c2f34;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  padding: 32px 24px;
+  min-width: 340px;
+  max-width: 95vw;
+  margin: 0 auto;
+  margin-bottom: 32px;
+  border: 3px solid transparent;
+  position: relative;
+}
+
+/* Question Icons */
+.question-icon {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.question-icons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.question-icons .question-icon {
+  margin-bottom: 0;
+}
+
+.question {
+  font-size: 1.2rem;
+  margin-bottom: 18px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Input Styling */
+.input {
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: none;
+  margin: 8px 4px;
+  font-size: 1rem;
+  background: #232526;
+  color: #fff;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: box-shadow 0.2s;
+  min-width: 120px;
+}
+
+.input:focus {
+  box-shadow: 0 0 0 2px #61dafb;
+}
+
+.input-with-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.input-symbol {
+  font-size: 1.1rem;
+  color: #bbb;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* Pair Input */
+.pair-input-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.pair-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.pair-list li {
+  margin-bottom: 8px;
+  font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* Buttons */
+.add-btn, .remove-btn, .nav-btn, .submit-btn, .proceed-btn {
   background: #61dafb;
   color: #232526;
   border: none;
   border-radius: 8px;
-  padding: 10px 28px;
-  font-size: 1.1rem;
+  padding: 10px 20px;
+  margin: 4px;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 12px;
-  transition: background 0.2s, color 0.2s;
-}
-.proceed-btn:hover {
-  background: #21a1f3;
-  color: #fff;
-}
-@media (max-width: 600px) {
-  .service-icons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-  }
-  .service-select-modal {
-    min-width: unset;
-    padding: 18px 6px;
-  }
-}
-@media (min-width: 601px) {
-  .service-icons {
-    flex-direction: row;
-    gap: 32px;
-  }
+  transition: all 0.2s ease;
+  min-width: 80px;
 }
 
+.add-btn:hover, .remove-btn:hover, .nav-btn:hover, .submit-btn:hover, .proceed-btn:hover {
+  background: #21a1f3;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.remove-btn {
+  background: #ff4d4f;
+  color: #fff;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  min-width: auto;
+}
+
+.remove-btn:hover {
+  background: #d9363e;
+}
+
+.submit-btn {
+  background: #4CAF50;
+  min-width: 120px;
+}
+
+.submit-btn:hover {
+  background: #45a049;
+}
+
+/* Disabled Button States */
+.disabled {
+  background: #555 !important;
+  color: #999 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.disabled:hover {
+  background: #555 !important;
+  color: #999 !important;
+  transform: none !important;
+}
+
+/* Loading Spinner */
+.submit-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading-spinner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-text {
+  position: absolute;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #61dafb;
+}
+
+/* Results */
+.result-status {
+  margin: 16px 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.result-status.success {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid #4CAF50;
+  color: #4CAF50;
+}
+
+.result-status.error {
+  background: rgba(244, 67, 54, 0.2);
+  border: 1px solid #f44336;
+  color: #f44336;
+}
+
+.share-message {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(97, 218, 251, 0.1);
+  border: 1px solid rgba(97, 218, 251, 0.3);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Actions */
+.actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Error Messages */
+.error {
+  color: #ff4d4f;
+  margin: 12px 0;
+  font-weight: 500;
+  text-align: center;
+  background: rgba(255, 77, 79, 0.1);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 77, 79, 0.3);
+}
+
+/* Footer */
 .footer-smallprint {
   font-size: 0.85rem;
   color: #bbb;
@@ -224,8 +430,52 @@ h1 {
   text-decoration: none;
   margin: 0 3px;
   transition: color 0.2s;
-  }
+}
+
 .footer-link:hover {
   color: #21a1f3;
   text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .service-icons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  
+  .service-select-modal, .modal {
+    min-width: unset;
+    padding: 18px 12px;
+    margin: 0 12px 32px 12px;
+  }
+  
+  .input {
+    width: 100%;
+    margin: 4px 0;
+  }
+  
+  .pair-input-container {
+    flex-direction: column;
+  }
+  
+  .help-button {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .help-button span {
+    display: none;
+  }
+}
+
+@media (min-width: 601px) {
+  .service-icons {
+    flex-direction: row;
+    gap: 32px;
+  }
 }
