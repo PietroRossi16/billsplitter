@@ -406,6 +406,30 @@ h1 {
   text-align: center;
   font-size: 0.95rem;
   line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.share-btn {
+  background: #43D15D;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 24px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.share-btn:hover {
+  transform: scale(1.05);
+}
+
+.share-btn:active {
+  transform: scale(0.98);
 }
 
 /* Actions */
@@ -499,6 +523,10 @@ h1 {
   
   .help-button span {
     display: none;
+  }
+  
+  .share-message {
+    margin: 24px 12px 0 12px;
   }
 }
 

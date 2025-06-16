@@ -456,6 +456,30 @@ function App() {
     }
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: "Bill Splitter",
+      text: "Check out this awesome Bill Splitter app that helps you split bills fairly with your flatmates!",
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        // Use Web Share API on mobile devices
+        await navigator.share(shareData);
+      } else {
+        // Fallback for desktop: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        setError("Link copied to clipboard!");
+        setTimeout(() => setError(""), 2000);
+      }
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        setError("Failed to share. Please try copying the link manually.");
+      }
+    }
+  };
+
   const renderIcon = (iconKey) => {
     const iconData = SERVICE_ICONS.find((s) => s.key === iconKey);
     if (!iconData) return null;
@@ -578,8 +602,11 @@ function App() {
             Start Over
           </button>
           <div className="share-message">
-            If you like our tool and find it useful, please send it to your
+            If you like our tool and find it useful, please share it with your
             friends! We appreciate your support.
+            <button className="share-btn" onClick={handleShare}>
+              Share
+            </button>
           </div>
         </div>
       ) : (
