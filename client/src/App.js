@@ -564,12 +564,10 @@ function App() {
               current.borderColor === "gradient"
                 ? "transparent"
                 : current.borderColor,
-            background:
+            borderImage:
               current.borderColor === "gradient"
-                ? "linear-gradient(90deg, #FFD700 50%, #FF4444 50%)"
-                : "transparent",
-            backgroundClip:
-              current.borderColor === "gradient" ? "padding-box" : "initial",
+                ? "linear-gradient(90deg, #FFD700 50%, #FF4444 50%) 1"
+                : "none",
           }}
         >
           {renderQuestionIcons()}
