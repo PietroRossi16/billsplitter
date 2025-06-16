@@ -1,0 +1,231 @@
+.App {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  padding-top: 40px;
+}
+
+h1 {
+  margin-bottom: 24px;
+  font-size: 2.5rem;
+  letter-spacing: 1px;
+}
+
+.modal {
+  background: #2c2f34;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  padding: 32px 24px;
+  min-width: 340px;
+  max-width: 95vw;
+  margin: 0 auto;
+  margin-bottom: 32px;
+}
+
+.question {
+  font-size: 1.2rem;
+  margin-bottom: 18px;
+  font-weight: 500;
+}
+
+.input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  margin: 0 8px 12px 0;
+  font-size: 1rem;
+  width: 180px;
+  background: #232526;
+  color: #fff;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: box-shadow 0.2s;
+}
+.input:focus {
+  box-shadow: 0 0 0 2px #61dafb;
+}
+
+.input-symbol {
+  font-size: 1.1rem;
+  color: #bbb;
+  margin-left: 2px;
+  white-space: nowrap;
+}
+
+.add-btn, .remove-btn, .nav-btn, .submit-btn {
+  background: #61dafb;
+  color: #232526;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  margin: 0 6px 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.add-btn:hover, .remove-btn:hover, .nav-btn:hover, .submit-btn:hover {
+  background: #21a1f3;
+  color: #fff;
+}
+
+.remove-btn {
+  background: #ff4d4f;
+  color: #fff;
+  margin-left: 12px;
+}
+.remove-btn:hover {
+  background: #d9363e;
+}
+
+.actions {
+  margin-top: 18px;
+}
+
+.pair-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+}
+.pair-list li {
+  margin-bottom: 6px;
+  font-size: 1rem;
+}
+
+.error {
+  color: #ff4d4f;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+@media (max-width: 500px) {
+  .modal {
+    min-width: unset;
+    padding: 18px 6px;
+  }
+  .input {
+    width: 120px;
+  }
+}
+
+.service-select-modal {
+  background: #2c2f34;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  padding: 32px 24px;
+  min-width: 340px;
+  max-width: 95vw;
+  margin: 0 auto 32px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.service-icons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 24px;
+  gap: 24px;
+}
+
+.service-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: #232526;
+  border-radius: 16px;
+  font-size: 2.2rem;
+  color: #bbb;
+  cursor: pointer;
+  position: relative;
+  border: 2px solid transparent;
+  transition: border 0.2s, color 0.2s, background 0.2s;
+}
+.service-icon.selected {
+  border: 2px solid #61dafb;
+  color: #61dafb;
+  background: #232d3a;
+}
+.service-label {
+  font-size: 1rem;
+  margin-top: 8px;
+  color: #fff;
+}
+.tick {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: #61dafb;
+  color: #232526;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.proceed-btn {
+  background: #61dafb;
+  color: #232526;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: background 0.2s, color 0.2s;
+}
+.proceed-btn:hover {
+  background: #21a1f3;
+  color: #fff;
+}
+@media (max-width: 600px) {
+  .service-icons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .service-select-modal {
+    min-width: unset;
+    padding: 18px 6px;
+  }
+}
+@media (min-width: 601px) {
+  .service-icons {
+    flex-direction: row;
+    gap: 32px;
+  }
+}
+
+.footer-smallprint {
+  font-size: 0.85rem;
+  color: #bbb;
+  text-align: center;
+  margin-top: 32px;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.footer-link {
+  color: #61dafb;
+  text-decoration: none;
+  margin: 0 3px;
+  transition: color 0.2s;
+}
+.footer-link:hover {
+  color: #21a1f3;
+  text-decoration: underline;
+}
