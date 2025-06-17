@@ -87,30 +87,18 @@ function getSteps(selected) {
     });
   }
 
-  // Electricity
+  // Electricity (combine both questions into one step)
   if (selected.electricity) {
     steps.push({
-      key: "elec_std_rate_pence",
-      question:
-        "Insert the electricity-related standing rate (before VAT, e.g. 27.89 p/day)",
-      type: "number_pence_per_day",
-      min: 0,
-      validate: (v) => v >= 0,
-      icon: "electricity",
-      borderColor: "#FFD700",
-    });
-    steps.push({
-      key: "elec_tot_charge",
-      question: "Insert the electricity-related total charge (after VAT)",
-      type: "number_pounds",
-      min: 0,
-      validate: (v) => v >= 0,
+      key: "electricity_combined",
+      question: "Insert the electricity-related standing rate (before VAT, e.g. 27.89 p/day) and total charge (after VAT)",
+      type: "electricity_combined",
       icon: "electricity",
       borderColor: "#FFD700",
     });
   }
 
-  // Gas
+  // Gas (leave as is)
   if (selected.gas) {
     steps.push({
       key: "gas_std_rate_pence",
@@ -306,6 +294,11 @@ function App() {
     if (current.type === "pairs" || current.type === "pairs_names_only") {
       return pairs.length === parseInt(answers.num_ppl || 0, 10);
     }
+    if (current.type === "electricity_combined") {
+      const std = parseFloat(answers.elec_std_rate_pence);
+      const tot = parseFloat(answers.elec_tot_charge);
+      return !isNaN(std) && std >= 0 && !isNaN(tot) && tot >= 0;
+    }
     if (current.type.startsWith("number")) {
       const val = parseFloat(answers[current.key]);
       return !isNaN(val) && (!current.validate || current.validate(val));
@@ -373,7 +366,11 @@ function App() {
   };
 
   const handleChange = (e) => {
-    setAnswers((a) => ({ ...a, [current.key]: e.target.value }));
+    if (current.type === "electricity_combined") {
+      setAnswers((a) => ({ ...a, [e.target.name]: e.target.value }));
+    } else {
+      setAnswers((a) => ({ ...a, [current.key]: e.target.value }));
+    }
   };
 
   const handlePairChange = (e) => {
@@ -741,6 +738,38 @@ function App() {
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {current.type === "electricity_combined" && (
+            <div>
+              <div className="input-with-symbol">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  name="elec_std_rate_pence"
+                  placeholder="Standing rate (pence/day)"
+                  min={0}
+                  value={answers.elec_std_rate_pence || ""}
+                  onChange={handleChange}
+                  onInput={(e) => handleNumberInput(e, true)}
+                  className="input"
+                />
+                <span className="input-symbol">pence/day</span>
+              </div>
+              <div className="input-with-symbol">
+                <span className="input-symbol">£</span>
+                <input
+                  type="text"
+                  name="elec_tot_charge"
+                  placeholder="Total charge (after VAT)"
+                  min={0}
+                  value={answers.elec_tot_charge || ""}
+                  onChange={handleChange}
+                  onInput={(e) => handleNumberInput(e, true)}
+                  className="input"
+                />
+              </div>
             </div>
           )}
 
