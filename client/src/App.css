@@ -21,24 +21,23 @@ h1 {
 .help-button {
   position: fixed;
   top: 20px;
-  right: 20px;
+  right: 120px;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(97, 218, 251, 0.1);
-  border: 1px solid rgba(97, 218, 251, 0.3);
-  border-radius: 20px;
   padding: 8px 16px;
+  background: #232526;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
   font-size: 0.9rem;
+  transition: background-color 0.2s;
   z-index: 1000;
 }
 
 .help-button:hover {
-  background: rgba(97, 218, 251, 0.2);
-  border-color: rgba(97, 218, 251, 0.5);
-  transform: translateY(-1px);
+  background: #2c2e2f;
 }
 
 /* Help Popup */
@@ -235,9 +234,8 @@ h1 {
   outline: none;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   transition: box-shadow 0.2s;
-  width: 100%;
-  max-width: 300px;
   box-sizing: border-box;
+  text-align: right;
 }
 
 .input:focus {
@@ -252,6 +250,7 @@ h1 {
   margin: 12px 0;
   width: 100%;
   max-width: 300px;
+  flex-direction: row;
 }
 
 .input-symbol {
@@ -259,6 +258,16 @@ h1 {
   color: #bbb;
   white-space: nowrap;
   font-weight: 500;
+  margin-left: 8px;
+  margin-right: 0;
+  min-width: 80px;
+}
+
+.input-with-symbol .input {
+  width: 100%;
+  max-width: 300px;
+  min-width: 200px;
+  flex: 1;
 }
 
 /* Pair Input */
@@ -574,4 +583,23 @@ h1 {
   color: #adb5bd;
   cursor: not-allowed;
   transform: none;
+}
+
+.restart-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 8px 16px;
+  background: #232526;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+  z-index: 1000;
+}
+
+.restart-btn:hover {
+  background: #2c2e2f;
 }

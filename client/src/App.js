@@ -67,8 +67,11 @@ function getSteps(selected) {
   if (selected.electricity || selected.gas) {
     steps.push({
       key: "tax_rate",
-      question:
-        "Insert the VAT available on your bills receipt (usually around 5%)",
+      question: selected.electricity && selected.gas
+        ? "Insert the VAT rate available on your energy bills receipt (usually around 5%)"
+        : selected.electricity
+        ? "Insert the VAT rate available on your electricity bills receipt (usually around 5%)"
+        : "Insert the VAT rate available on your gas bills receipt (usually around 5%)",
       type: "number_percent",
       min: 0,
       validate: (v) => v >= 0,
@@ -91,7 +94,7 @@ function getSteps(selected) {
   if (selected.electricity) {
     steps.push({
       key: "electricity_combined",
-      question: "Insert the electricity-related standing rate (before VAT, e.g. 27.89 p/day) and total charge (after VAT)",
+      question: "",
       type: "electricity_combined",
       icon: "electricity",
       borderColor: "#FFD700",
@@ -101,21 +104,9 @@ function getSteps(selected) {
   // Gas (leave as is)
   if (selected.gas) {
     steps.push({
-      key: "gas_std_rate_pence",
-      question:
-        "Insert the gas-related standing rate (before VAT, e.g. 27.89 p/day)",
-      type: "number_pence_per_day",
-      min: 0,
-      validate: (v) => v >= 0,
-      icon: "gas",
-      borderColor: "#FF4444",
-    });
-    steps.push({
-      key: "gas_tot_charge",
-      question: "Insert the gas-related total charge (after VAT)",
-      type: "number_pounds",
-      min: 0,
-      validate: (v) => v >= 0,
+      key: "gas_combined",
+      question: "",
+      type: "gas_combined",
       icon: "gas",
       borderColor: "#FF4444",
     });
@@ -266,6 +257,26 @@ function App() {
   const inputRef = useRef(null);
   const nameInputRef = useRef(null);
   const daysInputRef = useRef(null);
+  const elecTotChargeRef = useRef(null);
+  const gasTotChargeRef = useRef(null);
+
+  const handleRestart = () => {
+    setServiceStep(true);
+    setStep(0);
+    setAnswers({});
+    setPairs([]);
+    setPairInput({ name: "", num_days: "" });
+    setSelected({
+      electricity: false,
+      gas: false,
+      wifi: false,
+      tv: false,
+    });
+    setResult(null);
+    setError("");
+    setLoading(false);
+    setLoadingProgress(0);
+  };
 
   const steps = getSteps(selected);
   const current = steps[step];
@@ -297,6 +308,11 @@ function App() {
     if (current.type === "electricity_combined") {
       const std = parseFloat(answers.elec_std_rate_pence);
       const tot = parseFloat(answers.elec_tot_charge);
+      return !isNaN(std) && std >= 0 && !isNaN(tot) && tot >= 0;
+    }
+    if (current.type === "gas_combined") {
+      const std = parseFloat(answers.gas_std_rate_pence);
+      const tot = parseFloat(answers.gas_tot_charge);
       return !isNaN(std) && std >= 0 && !isNaN(tot) && tot >= 0;
     }
     if (current.type.startsWith("number")) {
@@ -367,6 +383,8 @@ function App() {
 
   const handleChange = (e) => {
     if (current.type === "electricity_combined") {
+      setAnswers((a) => ({ ...a, [e.target.name]: e.target.value }));
+    } else if (current.type === "gas_combined") {
       setAnswers((a) => ({ ...a, [e.target.name]: e.target.value }));
     } else {
       setAnswers((a) => ({ ...a, [current.key]: e.target.value }));
@@ -511,16 +529,118 @@ function App() {
     }
   }, [step, serviceStep, result, current.type]);
 
-  // Add Enter key for Add button in pairs steps
+  // Update handlePairKeyDown to handle Enter navigation between name and days, and to next step after last entry
   const handlePairKeyDown = (e) => {
     if (e.key === "Enter") {
-      handleAddPair();
+      if (e.target.name === "name") {
+        // Move focus to days field if available
+        if (daysInputRef.current) {
+          daysInputRef.current.focus();
+          e.preventDefault();
+        }
+      } else if (e.target.name === "num_days") {
+        // If name is empty, focus back on name field
+        if (!pairInput.name) {
+          if (nameInputRef.current) {
+            nameInputRef.current.focus();
+            e.preventDefault();
+            return;
+          }
+        }
+        // If both fields are filled, add pair and move focus
+        if (pairInput.name && !isNaN(parseFloat(pairInput.num_days)) && parseFloat(pairInput.num_days) <= answers.tot_days) {
+          handleAddPair();
+          setTimeout(() => {
+            if (pairs.length + 1 < parseInt(answers.num_ppl || 0, 10)) {
+              if (nameInputRef.current) nameInputRef.current.focus();
+            } else {
+              // If last pair, go to next step
+              if (isStepValid()) handleNext();
+            }
+          }, 0);
+          e.preventDefault();
+        }
+      }
+    }
+  };
+
+  // Update handleCombinedKeyDown to move focus from first to second input, or go to next step from second input
+  const handleCombinedKeyDown = (e) => {
+    if (e.key === "Enter") {
+      if (current.type === "electricity_combined") {
+        if (e.target.name === "elec_std_rate_pence") {
+          if (elecTotChargeRef.current) {
+            elecTotChargeRef.current.focus();
+            e.preventDefault();
+            return;
+          }
+        } else if (e.target.name === "elec_tot_charge") {
+          // If first input is empty, focus back on it
+          if (!answers.elec_std_rate_pence) {
+            if (inputRef.current) {
+              inputRef.current.focus();
+              e.preventDefault();
+              return;
+            }
+          }
+          // If both inputs are filled, proceed to next step
+          if (isStepValid()) {
+            if (step < steps.length - 1) {
+              handleNext();
+            } else {
+              handleSubmit();
+            }
+            e.preventDefault();
+            return;
+          }
+        }
+      } else if (current.type === "gas_combined") {
+        if (e.target.name === "gas_std_rate_pence") {
+          if (gasTotChargeRef.current) {
+            gasTotChargeRef.current.focus();
+            e.preventDefault();
+            return;
+          }
+        } else if (e.target.name === "gas_tot_charge") {
+          // If first input is empty, focus back on it
+          if (!answers.gas_std_rate_pence) {
+            if (inputRef.current) {
+              inputRef.current.focus();
+              e.preventDefault();
+              return;
+            }
+          }
+          // If both inputs are filled, proceed to next step
+          if (isStepValid()) {
+            if (step < steps.length - 1) {
+              handleNext();
+            } else {
+              handleSubmit();
+            }
+            e.preventDefault();
+            return;
+          }
+        }
+      }
+      // fallback: original behavior
+      if (isStepValid()) {
+        if (step < steps.length - 1) {
+          handleNext();
+        } else {
+          handleSubmit();
+        }
+      }
     }
   };
 
   return (
     <div className="App">
       <h1>Bill Splitter</h1>
+
+      {/* Restart button */}
+      <button className="restart-btn" onClick={handleRestart}>
+        Start Over
+      </button>
 
       {/* Help button */}
       <div className="help-button" onClick={() => setShowHelp(true)}>
@@ -567,8 +687,10 @@ function App() {
           <ul>
             {result.results.map((r) => (
               <li key={r.name}>
-                <b>{r.name}</b> stayed {r.days} days, owes{" "}
-                <b>£{r.share.toFixed(2)}</b>
+                <b>{r.name}</b>
+                {(selected.electricity || selected.gas) && ` stayed ${r.days} days`}
+                {` owes `}
+                <b>£{Number(r.share).toFixed(2)}</b>
               </li>
             ))}
           </ul>
@@ -577,27 +699,8 @@ function App() {
           >
             {result.all_good
               ? "All good!"
-              : `Calculation error: £${result.error.toFixed(2)}`}
+              : `Calculation error: £${Number(result.error).toFixed(2)}`}
           </div>
-          <button
-            className="start-over-btn"
-            onClick={() => {
-              setResult(null);
-              setServiceStep(true);
-              setStep(0);
-              setAnswers({});
-              setPairs([]);
-              setPairInput({ name: "", num_days: "" });
-              setSelected({
-                electricity: false,
-                gas: false,
-                wifi: false,
-                tv: false,
-              });
-            }}
-          >
-            Start Over
-          </button>
           <div className="share-message">
             If you like our tool and find it useful, please share it with your
             friends! We appreciate your support.
@@ -648,6 +751,7 @@ function App() {
                 onChange={handleChange}
                 onInput={(e) => handleNumberInput(e, true)}
                 className="input"
+                style={{ textAlign: "right" }}
               />
               <span className="input-symbol">%</span>
             </div>
@@ -663,6 +767,7 @@ function App() {
                 onChange={handleChange}
                 onInput={(e) => handleNumberInput(e, true)}
                 className="input"
+                style={{ textAlign: "right" }}
               />
               <span className="input-symbol">pence/day</span>
             </div>
@@ -670,7 +775,6 @@ function App() {
 
           {current.type === "number_pounds" && (
             <div className="input-with-symbol">
-              <span className="input-symbol">£</span>
               <input
                 ref={inputRef}
                 type="text"
@@ -679,7 +783,9 @@ function App() {
                 onChange={handleChange}
                 onInput={(e) => handleNumberInput(e, true)}
                 className="input"
+                style={{ textAlign: "right" }}
               />
+              <span className="input-symbol">£</span>
             </div>
           )}
 
@@ -696,6 +802,8 @@ function App() {
                   onChange={handlePairChange}
                   onKeyDown={handlePairKeyDown}
                   className="input"
+                  style={{ textAlign: "left" }}
+                  disabled={pairs.length >= parseInt(answers.num_ppl || 0, 10)}
                 />
                 {current.type === "pairs" && (
                   <input
@@ -710,6 +818,7 @@ function App() {
                     onInput={(e) => handleNumberInput(e, true)}
                     onKeyDown={handlePairKeyDown}
                     className="input"
+                    disabled={pairs.length >= parseInt(answers.num_ppl || 0, 10)}
                   />
                 )}
                 <button
@@ -724,11 +833,23 @@ function App() {
                   Add
                 </button>
               </div>
+              <div style={{ margin: '8px 0', fontWeight: 500, textAlign: 'center' }}>
+                {(() => {
+                  const numPeople = parseInt(answers.num_ppl || 0, 10);
+                  const left = numPeople - pairs.length;
+                  if (numPeople > 0 && left > 0) {
+                    return `You still have to add ${left} people`;
+                  } else if (numPeople > 0 && left === 0) {
+                    return 'All people have been added. Please click next!';
+                  } else {
+                    return null;
+                  }
+                })()}
+              </div>
               <ul className="pair-list">
                 {pairs.map((p, i) => (
                   <li key={i}>
-                    {p.name}{" "}
-                    {current.type === "pairs" && `- ${p.num_days} days`}
+                    {p.name} {current.type === "pairs" && `- ${p.num_days} days`}
                     <button
                       onClick={() => handleRemovePair(i)}
                       className="remove-btn"
@@ -743,32 +864,94 @@ function App() {
 
           {current.type === "electricity_combined" && (
             <div>
-              <div className="input-with-symbol">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  name="elec_std_rate_pence"
-                  placeholder="Standing rate (pence/day)"
-                  min={0}
-                  value={answers.elec_std_rate_pence || ""}
-                  onChange={handleChange}
-                  onInput={(e) => handleNumberInput(e, true)}
-                  className="input"
-                />
-                <span className="input-symbol">pence/day</span>
+              <div style={{ marginBottom: 16 }}>
+                <h3 style={{ marginBottom: 4 }}>
+                  Insert the electricity-related standing rate (before VAT, e.g. 27.89 p/day)
+                </h3>
+                <div className="input-with-symbol">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    name="elec_std_rate_pence"
+                    placeholder="Standing rate (pence/day)"
+                    min={0}
+                    value={answers.elec_std_rate_pence || ""}
+                    onChange={handleChange}
+                    onInput={(e) => handleNumberInput(e, true)}
+                    className="input"
+                    style={{ textAlign: "right", width: "100%", maxWidth: 300 }}
+                    onKeyDown={handleCombinedKeyDown}
+                  />
+                  <span className="input-symbol">pence/day</span>
+                </div>
               </div>
-              <div className="input-with-symbol">
-                <span className="input-symbol">£</span>
-                <input
-                  type="text"
-                  name="elec_tot_charge"
-                  placeholder="Total charge (after VAT)"
-                  min={0}
-                  value={answers.elec_tot_charge || ""}
-                  onChange={handleChange}
-                  onInput={(e) => handleNumberInput(e, true)}
-                  className="input"
-                />
+              <div>
+                <h3 style={{ marginBottom: 4 }}>
+                  Insert the electricity-related total charge (after VAT)
+                </h3>
+                <div className="input-with-symbol">
+                  <input
+                    ref={elecTotChargeRef}
+                    type="text"
+                    name="elec_tot_charge"
+                    placeholder="Total charge (after VAT)"
+                    min={0}
+                    value={answers.elec_tot_charge || ""}
+                    onChange={handleChange}
+                    onInput={(e) => handleNumberInput(e, true)}
+                    className="input"
+                    style={{ textAlign: "right", width: "100%", maxWidth: 300 }}
+                    onKeyDown={handleCombinedKeyDown}
+                  />
+                  <span className="input-symbol">£</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {current.type === "gas_combined" && (
+            <div>
+              <div style={{ marginBottom: 16 }}>
+                <h3 style={{ marginBottom: 4 }}>
+                  Insert the gas-related standing rate (before VAT, e.g. 27.89 p/day)
+                </h3>
+                <div className="input-with-symbol">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    name="gas_std_rate_pence"
+                    placeholder="Standing rate (pence/day)"
+                    min={0}
+                    value={answers.gas_std_rate_pence || ""}
+                    onChange={handleChange}
+                    onInput={(e) => handleNumberInput(e, true)}
+                    className="input"
+                    style={{ textAlign: "right", width: "100%", maxWidth: 300 }}
+                    onKeyDown={handleCombinedKeyDown}
+                  />
+                  <span className="input-symbol">pence/day</span>
+                </div>
+              </div>
+              <div>
+                <h3 style={{ marginBottom: 4 }}>
+                  Insert the gas-related total charge (after VAT)
+                </h3>
+                <div className="input-with-symbol">
+                  <input
+                    ref={gasTotChargeRef}
+                    type="text"
+                    name="gas_tot_charge"
+                    placeholder="Total charge (after VAT)"
+                    min={0}
+                    value={answers.gas_tot_charge || ""}
+                    onChange={handleChange}
+                    onInput={(e) => handleNumberInput(e, true)}
+                    className="input"
+                    style={{ textAlign: "right", width: "100%", maxWidth: 300 }}
+                    onKeyDown={handleCombinedKeyDown}
+                  />
+                  <span className="input-symbol">£</span>
+                </div>
               </div>
             </div>
           )}
